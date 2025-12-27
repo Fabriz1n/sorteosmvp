@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RifaMax | MVP Sorteos</title>
+  <style>
+    :root{
+      --bg:#07040b;
+      --bg2:#0c0712;
+      --card: rgba(255,255,255,.06);
+      --line: rgba(255,255,255,.10);
+      --text:#fff6e8;
+      --muted: rgba(255,246,232,.72);
+
+      /* 🔥 Paleta llamativa */
+      --red:#ff2b2b;
+      --red2:#ff005c;
+      --yellow:#ffd400;
+      --amber:#ffb000;
+      --orange:#ff6a00;
+
+      --green:#1cff7a;
+      --cyan:#26e6ff;
+      --purple:#8b5cff;
+
+      --shadow: 0 18px 70px rgba(0,0,0,.65);
+      --radius:18px;
+      --radius2:26px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(1100px 560px at 15% 10%, rgba(255,43,43,.22), transparent 60%),
+        radial-gradient(900px 520px at 85% 20%, rgba(255,212,0,.18), transparent 60%),
+        radial-gradient(860px 520px at 55% 92%, rgba(38,230,255,.10), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      overflow-x:hidden;
+    }
+    a{color:inherit; text-decoration:none}
+    .container{width:min(1180px, 92vw); margin:0 auto}
+    .muted{color:var(--muted)}
+    .w-100{width:100%}
+
+    /* ======= Topbar ======= */
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      background: rgba(7,4,11,.62);
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .topbar__inner{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0;
+      gap:14px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      min-width: 220px;
+    }
+    .logo{
+      width:40px; height:40px; border-radius:14px;
+      display:grid; place-items:center;
+      font-weight:1000;
+      letter-spacing:.5px;
+      background: linear-gradient(135deg, var(--red), var(--yellow));
+      box-shadow: 0 18px 45px rgba(255,43,43,.25);
+      border:1px solid rgba(255,255,255,.12);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo:before{
+      content:"";
+      position:absolute; inset:-40px;
+      background: conic-gradient(from 180deg, rgba(255,255,255,.0), rgba(255,255,255,.35), rgba(255,255,255,.0));
+      animation: spin 4.5s linear infinite;
+      opacity:.55;
+    }
+    .logo > span{position:relative; z-index:1}
+    @keyframes spin {to{transform:rotate(360deg)}}
+
+    .brand__name{
+      display:flex; flex-direction:column; line-height:1.05;
+    }
+    .brand__name strong{
+      font-size:14px;
+      letter-spacing:.3px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,212,0,.12);
+      border:1px solid rgba(255,212,0,.22);
+      color: rgba(255,246,232,.92);
+      width:fit-content;
+      margin-top:5px;
+    }
+    .tag .dot{
+      width:9px; height:9px; border-radius:50%;
+      background: var(--green);
+      box-shadow: 0 0 0 6px rgba(28,255,122,.12);
+    }
+
+    .nav{
+      display:flex; align-items:center; gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .nav a{
+      color: rgba(255,246,232,.80);
+      font-size:14px;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid transparent;
+    }
+    .nav a:hover{
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.10);
+    }
+
+    /* ======= Buttons ======= */
+    .btn{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:900;
+      letter-spacing:.15px;
+      transition: transform .15s ease, filter .15s ease, background .15s ease;
+      user-select:none;
+    }
+    .btn:hover{transform: translateY(-1px); background: rgba(255,255,255,.10)}
+    .btn:active{transform: translateY(0px)}
+    .btn:focus{outline:2px solid rgba(255,212,0,.35); outline-offset:2px}
+
+    .btn--hot{
+      border:0;
+      background: linear-gradient(135deg, var(--red), var(--yellow));
+      box-shadow: 0 18px 60px rgba(255,43,43,.22);
+      position:relative;
+      overflow:hidden;
+    }
+    .btn--hot:before{
+      content:"";
+      position:absolute; inset:-60px;
+      background: radial-gradient(closest-side, rgba(255,255,255,.30), transparent 60%);
+      transform: translateX(-60%) rotate(10deg);
+      opacity:.45;
+      transition: transform .3s ease;
+    }
+    .btn--hot:hover:before{transform: translateX(0%) rotate(10deg)}
+    .btn--soft{
+      background: rgba(255,212,0,.10);
+      border-color: rgba(255,212,0,.22);
+    }
+    .btn--ghost{
+      background: transparent;
+      border-color: rgba(255,255,255,.14);
+    }
+    .btn--danger{
+      background: rgba(255,43,43,.12);
+      border-color: rgba(255,43,43,.25);
+    }
+
+    /* ======= Hero ======= */
+    .hero{padding:54px 0 22px; position:relative}
+    .hero__grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:20px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .hero__grid{grid-template-columns:1fr}
+      .nav a{display:none}
+    }
+
+    .banner{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:999px;
+      background: rgba(255,43,43,.10);
+      border:1px solid rgba(255,43,43,.22);
+      color: rgba(255,246,232,.92);
+      font-weight:900;
+      font-size:12.5px;
+      width:fit-content;
+    }
+    .spark{
+      width:10px;height:10px;border-radius:2px;
+      background: linear-gradient(135deg, var(--yellow), var(--orange));
+      box-shadow: 0 0 0 6px rgba(255,212,0,.12);
+      transform: rotate(20deg);
+    }
+
+    h1{
+      margin:14px 0 10px;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height:1.02;
+      letter-spacing:-.5px;
+      text-shadow: 0 12px 30px rgba(0,0,0,.45);
+    }
+    .hero p{
+      margin:0;
+      color: var(--muted);
+      font-size: 15.5px;
+      line-height:1.65;
+      max-width: 62ch;
+    }
+    .hero__actions{
+      margin-top:16px;
+      display:flex; gap:12px; flex-wrap:wrap;
+      align-items:center;
+    }
+    .miniPills{
+      margin-top:16px;
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:9px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      font-size:12.5px;
+      color: rgba(255,246,232,.84);
+      font-weight:900;
+    }
+    .pill b{color: var(--yellow)}
+    .heroStats{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 560px){.heroStats{grid-template-columns:1fr}}
+    .stat{
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .stat:before{
+      content:"";
+      position:absolute; inset:-40px;
+      background: radial-gradient(closest-side, rgba(255,212,0,.12), transparent 65%);
+      opacity:.6;
+    }
+    .stat__value{
+      position:relative;
+      font-weight:1000;
+      font-size:18px;
+    }
+    .stat__label{
+      position:relative;
+      margin-top:4px;
+      color: rgba(255,246,232,.65);
+      font-size:12.5px;
+      font-weight:800;
+    }
+
+    /* ======= Featured card ======= */
+    .featured{
+      border-radius: var(--radius2);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .featured:before{
+      content:"";
+      position:absolute; inset:-120px;
+      background:
+        radial-gradient(closest-side, rgba(255,43,43,.20), transparent 65%),
+        radial-gradient(closest-side, rgba(255,212,0,.14), transparent 60%);
+      transform: translate(10%, -10%);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .featured__top{
+      position:relative;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 16px 10px;
+      gap:10px;
+    }
+    .badgeHot{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(255,43,43,.16);
+      border:1px solid rgba(255,43,43,.26);
+      font-weight:1000;
+      font-size:12px;
+      width:fit-content;
+    }
+    .badgeHot .flame{
+      width:18px;height:18px;border-radius:6px;
+      display:grid; place-items:center;
+      background: linear-gradient(135deg, var(--red), var(--yellow));
+      color:#12040c;
+      font-weight:1000;
+    }
+    .countdown{
+      font-variant-numeric: tabular-nums;
+      font-size:12px;
+      font-weight:1000;
+      color: rgba(255,246,232,.88);
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.26);
+      border:1px solid rgba(255,255,255,.12);
+      white-space:nowrap;
+    }
+    .featured__content{
+      position:relative;
+      display:grid;
+      grid-template-columns: 170px 1fr;
+      gap:14px;
+      padding: 6px 16px 16px;
+      align-items:start;
+    }
+    @media(max-width: 430px){
+      .featured__content{grid-template-columns:1fr}
+    }
+    .thumb{
+      height:170px;
+      border-radius: 24px;
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(90px 90px at 25% 30%, rgba(255,212,0,.34), transparent 60%),
+        radial-gradient(110px 110px at 80% 70%, rgba(255,43,43,.25), transparent 60%),
+        linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    .featured h3{
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight:1000;
+    }
+    .sub{
+      margin:0 0 12px;
+      color: rgba(255,246,232,.70);
+      font-size:13px;
+      line-height:1.55;
+    }
+    .miniGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin: 12px 0 12px;
+    }
+    .miniBox{
+      border-radius: 16px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.10);
+      padding:10px 12px;
+    }
+    .miniBox .k{font-size:12px; color:rgba(255,246,232,.62); font-weight:900}
+    .miniBox .v{font-size:16px; font-weight:1000}
+    .miniBox .v b{color: var(--yellow)}
+
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color: rgba(255,246,232,.60);
+      font-weight:800;
+    }
+
+    /* ======= Sections ======= */
+    .section{padding:46px 0}
+    .section__head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    h2{
+      margin:0;
+      font-size: 26px;
+      letter-spacing:-.2px;
+    }
+
+    /* ======= Filters ======= */
+    .filters{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+    .search{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      min-width: 260px;
+    }
+    .search input{
+      width: 100%;
+      border:0;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-weight:900;
+    }
+    .search input::placeholder{color: rgba(255,246,232,.45)}
+    select{
+      border-radius: 16px;
+      padding:10px 12px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color: var(--text);
+      font-weight:900;
+      cursor:pointer;
+      outline:none;
+    }
+
+    /* ======= Cards Grid ======= */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+    @media (max-width: 920px){.grid{grid-template-columns: repeat(2, 1fr)}}
+    @media (max-width: 560px){.grid{grid-template-columns: 1fr}}
+
+    .card{
+      border-radius: 24px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,.30);
+      transition: transform .15s ease, border .15s ease, background .15s ease;
+      position:relative;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.18);
+    }
+    .media{
+      height: 150px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(110px 110px at 20% 25%, rgba(255,212,0,.35), transparent 60%),
+        radial-gradient(130px 130px at 80% 70%, rgba(255,43,43,.25), transparent 60%),
+        linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+    }
+    .ribbon{
+      position:absolute;
+      top:12px; left:-46px;
+      width:170px;
+      transform: rotate(-18deg);
+      background: linear-gradient(135deg, var(--red), var(--yellow));
+      color: #1b0710;
+      font-weight:1000;
+      font-size:12px;
+      text-align:center;
+      padding:7px 0;
+      box-shadow: 0 14px 30px rgba(255,43,43,.22);
+    }
+    .body{padding:14px}
+    .row{display:flex; justify-content:space-between; align-items:center; gap:10px}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.10);
+      font-weight:1000;
+      font-size:12px;
+      color: rgba(255,246,232,.90);
+      white-space:nowrap;
+    }
+    .chip i{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--yellow);
+      box-shadow: 0 0 0 6px rgba(255,212,0,.12);
+      display:inline-block;
+    }
+    .small{font-size:12px; color: rgba(255,246,232,.62); font-weight:800}
+    .title{margin:10px 0 10px; font-weight:1000; font-size:16px; letter-spacing:-.15px}
+    .price{
+      font-size:16px;
+      font-weight:1000;
+    }
+    .price b{color: var(--yellow)}
+    .progressWrap{margin-top:12px}
+    .progressTop{display:flex; justify-content:space-between; margin-bottom:8px}
+    .progress{
+      height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--red), var(--yellow));
+      border-radius:999px;
+      transition: width .28s ease;
+    }
+    .ctaRow{display:flex; gap:10px; margin-top:12px}
+    .btnSmall{
+      padding:10px 12px;
+      border-radius: 14px;
+      font-weight:1000;
+      flex:1;
+    }
+
+    /* ======= Footer ======= */
+    .footer{
+      padding:22px 0;
+      border-top:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .footer__inner{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+      color: rgba(255,246,232,.70);
+      font-weight:900;
+      font-size:13px;
+    }
+
+    /* ======= Toast ======= */
+    .toast{
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(18px);
+      opacity:0;
+      pointer-events:none;
+      padding:12px 14px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.62);
+      border:1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.65);
+      transition: .22s opacity, .22s transform;
+      max-width:min(560px, 92vw);
+      text-align:center;
+      font-weight:1000;
+    }
+    .toast.show{opacity:1; transform: translateX(-50%) translateY(0px)}
+
+    /* ======= Modals ======= */
+    .modal{
+      position:fixed; inset:0; z-index:80;
+      display:none;
+    }
+    .modal.show{display:block}
+    .backdrop{
+      position:absolute; inset:0;
+      background: rgba(0,0,0,.62);
+      backdrop-filter: blur(8px);
+    }
+    .panel{
+      position:relative;
+      width:min(980px, 92vw);
+      margin: 6vh auto;
+      border-radius: 24px;
+      background: rgba(14,8,20,.92);
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panelHead{
+      display:flex; justify-content:space-between; align-items:flex-start;
+      padding:16px 16px 10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      gap:14px;
+    }
+    .panelHead h3{margin:6px 0 0; font-size:18px; font-weight:1000}
+    .iconBtn{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      border-radius: 12px;
+      width:42px; height:42px;
+      cursor:pointer;
+      font-weight:1000;
+    }
+    .panelBody{
+      padding:16px;
+      display:grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap:14px;
+    }
+    @media(max-width: 900px){.panelBody{grid-template-columns:1fr}}
+
+    .modalMedia{
+      height:240px;
+      border-radius: 22px;
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(140px 140px at 25% 25%, rgba(255,212,0,.35), transparent 60%),
+        radial-gradient(160px 160px at 75% 65%, rgba(255,43,43,.26), transparent 60%),
+        linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
+      box-shadow: 0 18px 55px rgba(0,0,0,.35);
+    }
+    .metaGrid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width: 560px){.metaGrid{grid-template-columns:1fr}}
+    .meta{
+      padding:12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.24);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .meta .k{font-size:12px; color:rgba(255,246,232,.62); font-weight:1000}
+    .meta .v{font-size:16px; font-weight:1000}
+    .meta .v b{color: var(--yellow)}
+
+    .buyRow{
+      display:flex; gap:10px; align-items:center;
+      margin-top:12px;
+    }
+    @media (max-width: 560px){.buyRow{flex-direction:column; align-items:stretch}}
+    .qty{
+      display:flex; align-items:center;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+    }
+    .qtyBtn{
+      width:44px; height:44px;
+      border:0; background:transparent; color:var(--text);
+      cursor:pointer; font-size:18px; font-weight:1000;
+    }
+    .qtyBtn:hover{background: rgba(255,255,255,.10)}
+    .qtyInput{
+      width:70px;
+      border:0; outline:none;
+      background:transparent;
+      color:var(--text);
+      text-align:center;
+      font-weight:1000;
+      font-size:14px;
+    }
+    .qtyInput::-webkit-outer-spin-button,
+    .qtyInput::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+
+    /* ======= Admin ======= */
+    .panelWide{width:min(1200px, 94vw)}
+    .adminGrid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr .95fr;
+      gap:12px;
+      padding:16px;
+    }
+    @media (max-width: 1050px){.adminGrid{grid-template-columns:1fr}}
+    .adminCard{
+      border-radius: 24px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.12);
+      padding:14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.25);
+    }
+    .adminCard h4{margin:0 0 10px; font-weight:1000}
+    .form{display:grid; gap:12px}
+    .formRow{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .full{grid-column:1 / -1}
+    label span{display:block; font-size:12px; color:rgba(255,246,232,.62); font-weight:1000; margin-bottom:6px}
+    input, textarea, select{
+      width:100%;
+      background: rgba(0,0,0,.20);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      padding:10px 12px;
+      color: var(--text);
+      outline:none;
+      font-weight:900;
+    }
+    textarea{resize:vertical}
+    input:focus, textarea:focus, select:focus{outline:2px solid rgba(255,212,0,.28); border-color:transparent}
+    .actions{display:flex; justify-content:flex-end; gap:10px; align-items:center}
+    .adminList{display:grid; gap:10px; max-height: 430px; overflow:auto; padding-right:6px}
+    .adminItem{
+      padding:12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+      display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+    }
+    .adminItem .t{font-weight:1000}
+    .adminItem .s{font-size:12px; color:rgba(255,246,232,.62); margin-top:4px; font-weight:900}
+    .rowBtns{display:flex; gap:8px; flex-wrap:wrap}
+    .smallBtn{
+      padding:8px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      cursor:pointer;
+      font-weight:1000;
+      color:var(--text);
+    }
+    .smallBtn:hover{background: rgba(255,255,255,.10)}
+    .smallBtn.danger{
+      background: rgba(255,43,43,.12);
+      border-color: rgba(255,43,43,.25);
+    }
+    .winnerBox{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .winners{margin-top:12px; display:grid; gap:10px; max-height: 290px; overflow:auto; padding-right:6px}
+    .winner{
+      padding:12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .winner .top{display:flex; justify-content:space-between; gap:10px}
+    .winner .name{font-weight:1000}
+    .winner .meta{font-size:12px; color:rgba(255,246,232,.62); margin-top:4px; font-weight:900}
+
+    /* subtle bg grid */
+    .bgGrid{
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 54px 54px;
+      opacity:.14;
+      mask-image: radial-gradient(closest-side, rgba(0,0,0,.85), transparent 80%);
+      pointer-events:none;
+      z-index:-1;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="#">
+        <div class="logo"><span>RM</span></div>
+        <div class="brand__name">
+          <strong>RifaMax <span style="color:rgba(255,246,232,.65); font-weight:1000;">• Sorteos</span></strong>
+          <div class="tag"><span class="dot"></span> UI Pro • MVP Demo</div>
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a href="#sorteos">Sorteos</a>
+        <a href="#como">Cómo funciona</a>
+        <a href="#faq">FAQ</a>
+        <button class="btn btn--ghost" id="openAdminBtn" type="button">Admin (Demo)</button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="bgGrid" aria-hidden="true"></div>
+    <div class="container hero__grid">
+      <div>
+        <div class="banner"><span class="spark"></span> Plataforma de sorteos con estilo “viral” (demo)</div>
+        <h1>Sorteos con impacto: <span style="color:var(--yellow)">más llamativo</span>, más venta.</h1>
+        <p>
+          Catálogo con filtros, detalle en modal, compra simulada, publicación de ganadores y panel admin demo.
+          Perfecto para “mostrar como ejemplo” a tu cliente.
+        </p>
+
+        <div class="hero__actions">
+          <a class="btn btn--hot" href="#sorteos">Ver sorteos</a>
+          <button class="btn btn--soft" id="howBtn" type="button">Cómo funciona</button>
+          <button class="btn btn--danger" id="quickToastBtn" type="button">Ver efecto</button>
+        </div>
+
+        <div class="miniPills">
+          <div class="pill">🚀 Conversión: <b>alta</b></div>
+          <div class="pill">⚡ UI “rifa”: <b>rojo/amarillo</b></div>
+          <div class="pill">🛡️ MVP: <b>demo</b> (sin pagos)</div>
+        </div>
+
+        <div class="heroStats">
+          <div class="stat"><div class="stat__value">+2.4k</div><div class="stat__label">Usuarios interesados</div></div>
+          <div class="stat"><div class="stat__value">R$ 98k</div><div class="stat__label">Ventas estimadas</div></div>
+          <div class="stat"><div class="stat__value">128</div><div class="stat__label">Ganadores publicados</div></div>
+        </div>
+      </div>
+
+      <div class="featured">
+        <div class="featured__top">
+          <div class="badgeHot"><span class="flame">🔥</span> Sorteo destacado</div>
+          <div class="countdown" id="heroCountdown">⏳ --</div>
+        </div>
+
+        <div class="featured__content">
+          <div class="thumb" aria-hidden="true"></div>
+          <div>
+            <h3 id="featuredTitle">Auto 0km • Edición 2026</h3>
+            <p class="sub">Compra tickets digitales (demo), mira el progreso y publica ganadores.</p>
+
+            <div class="miniGrid">
+              <div class="miniBox">
+                <div class="k">Ticket</div>
+                <div class="v" id="featuredTicketPrice"><b>R$</b> 10</div>
+              </div>
+              <div class="miniBox">
+                <div class="k">Disponibles</div>
+                <div class="v" id="featuredAvailable">3.420</div>
+              </div>
+            </div>
+
+            <button class="btn btn--hot w-100" id="featuredBuyBtn" type="button">Comprar ticket (demo)</button>
+            <div class="hint">*Pago simulado. Ideal para demos comerciales.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="sorteos">
+    <div class="container">
+      <div class="section__head">
+        <div>
+          <h2>Sorteos activos</h2>
+          <div class="muted">Filtra, abre detalle, compra demo y mira progreso.</div>
+        </div>
+
+        <div class="filters">
+          <div class="search">
+            <span style="font-weight:1000; color:rgba(255,246,232,.65)">🔎</span>
+            <input id="searchInput" type="search" placeholder="Buscar: auto, casa, moto..." />
+          </div>
+          <select id="categorySelect">
+            <option value="all">Todas</option>
+            <option value="autos">Autos</option>
+            <option value="casas">Casas</option>
+            <option value="motos">Motos</option>
+            <option value="tecnologia">Tecnología</option>
+          </select>
+          <select id="sortSelect">
+            <option value="featured">Destacados</option>
+            <option value="ending">Terminan primero</option>
+            <option value="priceAsc">Ticket más barato</option>
+            <option value="priceDesc">Ticket más caro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid" id="cardsGrid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="como" style="border-top:1px solid rgba(255,255,255,.10); border-bottom:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03)">
+    <div class="container">
+      <div class="section__head">
+        <div>
+          <h2>Cómo funciona</h2>
+          <div class="muted">Este MVP es visual + flujo demo. Después se conecta a backend/pagos.</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1.1fr .9fr; gap:14px; align-items:start">
+        <div style="display:grid; gap:10px">
+          <div class="adminItem">
+            <div>
+              <div class="t">1) El usuario elige un sorteo</div>
+              <div class="s">Catálogo con filtros, badges y progreso.</div>
+            </div>
+            <div class="chip"><i></i> UI</div>
+          </div>
+          <div class="adminItem">
+            <div>
+              <div class="t">2) Compra tickets (demo)</div>
+              <div class="s">Se simula el pago y se incrementa vendidos.</div>
+            </div>
+            <div class="chip"><i></i> Checkout</div>
+          </div>
+          <div class="adminItem">
+            <div>
+              <div class="t">3) Admin publica ganadores</div>
+              <div class="s">Registro demo para mostrar transparencia.</div>
+            </div>
+            <div class="chip"><i></i> Admin</div>
+          </div>
+
+          <div style="border-radius:22px; padding:14px; background:rgba(255,212,0,.10); border:1px solid rgba(255,212,0,.22); font-weight:900">
+            ✅ Tip pro: separa “cliente/operador” del “desarrollador”. No uses tus cuentas para pagos/hosting.
+          </div>
+        </div>
+
+        <div class="adminCard">
+          <h4>Incluye</h4>
+          <div style="display:grid; gap:10px; margin-top:10px">
+            <div class="pill">🔥 Estilo “rifa” rojo/amarillo</div>
+            <div class="pill">🎯 Cards + filtros + modal</div>
+            <div class="pill">🏆 Ganadores demo</div>
+            <div class="pill">🧩 Admin CRUD (demo)</div>
+          </div>
+          <div class="hint">*Todo en 1 archivo para que nunca falle por rutas.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section__head">
+        <div>
+          <h2>FAQ</h2>
+          <div class="muted">Respuestas rápidas para tus clientes.</div>
+        </div>
+      </div>
+
+      <div style="display:grid; gap:10px">
+        <details style="border-radius:22px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); padding:14px">
+          <summary style="cursor:pointer; font-weight:1000">¿Procesa pagos reales?</summary>
+          <div class="muted" style="margin-top:10px; font-weight:900">No. Es demo. Luego se integra pasarela real.</div>
+        </details>
+
+        <details style="border-radius:22px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); padding:14px">
+          <summary style="cursor:pointer; font-weight:1000">¿Puedo cambiar colores o branding?</summary>
+          <div class="muted" style="margin-top:10px; font-weight:900">Sí. Cambias variables CSS y textos/logos.</div>
+        </details>
+
+        <details style="border-radius:22px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); padding:14px">
+          <summary style="cursor:pointer; font-weight:1000">¿Se puede hacer multi-país?</summary>
+          <div class="muted" style="margin-top:10px; font-weight:900">UI sí. Lo legal es por normativa del país.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div style="display:flex; align-items:center; gap:10px">
+        <div class="logo" style="width:34px;height:34px;border-radius:12px"><span>RM</span></div>
+        <div>RifaMax • MVP Demo</div>
+      </div>
+      <div><span id="year"></span> • UI/UX</div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Modal Sorteo -->
+  <div class="modal" id="drawModal" aria-hidden="true">
+    <div class="backdrop" data-close="true"></div>
+    <div class="panel" role="dialog" aria-modal="true">
+      <div class="panelHead">
+        <div>
+          <div class="badgeHot" id="modalCategory"><span class="flame">🎁</span> Categoría</div>
+          <h3 id="modalTitle">Título</h3>
+        </div>
+        <button class="iconBtn" id="closeDrawBtn" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="panelBody">
+        <div class="modalMedia" id="modalMedia" aria-hidden="true"></div>
+
+        <div>
+          <p class="muted" id="modalDesc" style="font-weight:900; margin-top:0"></p>
+
+          <div class="metaGrid">
+            <div class="meta"><div class="k">Ticket</div><div class="v" id="modalTicket"><b>R$</b> 0</div></div>
+            <div class="meta"><div class="k">Disponibles</div><div class="v" id="modalAvailable">0</div></div>
+            <div class="meta"><div class="k">Cierra</div><div class="v" id="modalEnds">--</div></div>
+          </div>
+
+          <div class="progressWrap">
+            <div class="progressTop">
+              <span class="small">Progreso</span>
+              <span class="small" id="modalProgressText">0%</span>
+            </div>
+            <div class="progress"><div class="bar" id="modalProgressBar"></div></div>
+          </div>
+
+          <div class="buyRow">
+            <div class="qty">
+              <button class="qtyBtn" id="qtyMinus" type="button">−</button>
+              <input class="qtyInput" id="qtyInput" type="number" min="1" value="1" />
+              <button class="qtyBtn" id="qtyPlus" type="button">+</button>
+            </div>
+            <button class="btn btn--hot w-100" id="buyBtn" type="button">Comprar (demo)</button>
+          </div>
+
+          <div class="hint">*Compra simulada: solo incrementa vendidos.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Admin -->
+  <div class="modal" id="adminModal" aria-hidden="true">
+    <div class="backdrop" data-close="true"></div>
+    <div class="panel panelWide" role="dialog" aria-modal="true">
+      <div class="panelHead">
+        <div>
+          <div class="badgeHot"><span class="flame">⚙️</span> Admin (Demo)</div>
+          <h3>Gestiona sorteos y ganadores</h3>
+        </div>
+        <button class="iconBtn" id="closeAdminBtn" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="adminGrid">
+        <div class="adminCard">
+          <h4>Crear / Editar</h4>
+          <form id="adminForm" class="form">
+            <div class="formRow">
+              <label><span>Título</span><input id="aTitle" required></label>
+              <label><span>Categoría</span>
+                <select id="aCategory">
+                  <option value="autos">Autos</option>
+                  <option value="casas">Casas</option>
+                  <option value="motos">Motos</option>
+                  <option value="tecnologia">Tecnología</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="formRow">
+              <label><span>Precio ticket</span><input id="aPrice" type="number" min="1" value="10" required></label>
+              <label><span>Tickets totales</span><input id="aTotal" type="number" min="10" value="5000" required></label>
+            </div>
+
+            <div class="formRow">
+              <label class="full"><span>Descripción</span><textarea id="aDesc" rows="3"></textarea></label>
+            </div>
+
+            <div class="formRow">
+              <label><span>Fecha cierre</span><input id="aEnds" type="date" required></label>
+              <label><span>Etiqueta</span>
+                <select id="aRibbon">
+                  <option value="HOT">HOT</option>
+                  <option value="NUEVO">NUEVO</option>
+                  <option value="OFERTA">OFERTA</option>
+                  <option value="VIP">VIP</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="actions">
+              <input type="hidden" id="aId">
+              <button class="btn btn--ghost" id="resetFormBtn" type="button">Limpiar</button>
+              <button class="btn btn--hot" type="submit">Guardar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="adminCard">
+          <h4>Lista</h4>
+          <div class="adminList" id="adminList"></div>
+        </div>
+
+        <div class="adminCard">
+          <h4>Ganadores (demo)</h4>
+          <div class="winnerBox">
+            <select id="winnerDrawSelect"></select>
+            <button class="btn btn--hot" id="publishWinnerBtn" type="button">Publicar ganador</button>
+          </div>
+          <div class="winners" id="winnersLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+
+    const state = {
+      currency: "R$",
+      draws: [],
+      winners: [],
+      activeDrawId: null,
+      qty: 1
+    };
+
+    function uuid(){
+      if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+      return "id-" + Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+    }
+
+    function daysFromNow(n){ const d=new Date(); d.setDate(d.getDate()+n); return d; }
+    function fmtDate(d){
+      return new Date(d).toLocaleDateString("es-BO",{year:"numeric",month:"short",day:"2-digit"});
+    }
+    function fmtDateTime(d){
+      return new Date(d).toLocaleString("es-BO",{year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+    }
+    function fmtMoney(n){ return `${state.currency} ${Number(n).toLocaleString("es-BO")}`; }
+    function fmtInt(n){ return Number(n).toLocaleString("es-BO"); }
+    function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+    function availableTickets(d){ return Math.max(0, d.totalTickets - d.soldTickets); }
+    function pctSold(d){ return d.totalTickets ? clamp(Math.round((d.soldTickets/d.totalTickets)*100),0,100) : 0; }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m])); }
+
+    function labelCategory(c){
+      return ({autos:"Autos",casas:"Casas",motos:"Motos",tecnologia:"Tecnología"}[c] || "Otros");
+    }
+    function catDotColor(c){
+      return ({autos:"var(--yellow)",casas:"var(--red)",motos:"var(--cyan)",tecnologia:"var(--green)"}[c] || "var(--yellow)");
+    }
+    function fakeName(){
+      const first=["Ana","Bruno","Carla","Diego","Elena","Felipe","Gabi","Hugo","Iris","João","Luca","Marina","Nico","Paula","Rafa","Sofia","Tiago","Valeria"];
+      const last=["Silva","Pereira","Souza","Gómez","Rojas","Fernández","Almeida","Costa","Rodrigues","Mendoza","Flores","Herrera","Castro","Santos","Vargas"];
+      return first[Math.floor(Math.random()*first.length)] + " " + last[Math.floor(Math.random()*last.length)];
+    }
+
+    let toastTimer=null;
+    function toast(msg){
+      const t=$("#toast");
+      t.textContent=msg;
+      t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer=setTimeout(()=>t.classList.remove("show"),2400);
+    }
+
+    function showModal(el){
+      el.classList.add("show");
+      el.setAttribute("aria-hidden","false");
+      document.body.style.overflow="hidden";
+    }
+    function hideModal(el){
+      el.classList.remove("show");
+      el.setAttribute("aria-hidden","true");
+      document.body.style.overflow="";
+    }
+
+    function startCountdown(el, endsAt){
+      const tick=()=>{
+        const diff = endsAt - new Date();
+        if(diff<=0){ el.textContent="Cerrado"; return; }
+        const d = Math.floor(diff/(1000*60*60*24));
+        const h = Math.floor(diff/(1000*60*60))%24;
+        const m = Math.floor(diff/(1000*60))%60;
+        el.textContent = `⏳ ${d}d ${String(h).padStart(2,"0")}h ${String(m).padStart(2,"0")}m`;
+      };
+      tick();
+      setInterval(tick, 1000*15);
+    }
+
+    function seedDraws(){
+      return [
+        { id:uuid(), title:"Auto 0km • Edición 2026", category:"autos", desc:"Sorteo demo con UI llamativa. Perfecto para mostrar al cliente.", price:10, totalTickets:5000, soldTickets:1580, endsAt:daysFromNow(12), featured:true, ribbon:"HOT" },
+        { id:uuid(), title:"Casa moderna • Zona premium", category:"casas", desc:"Sorteo demo. Puedes adaptar reglas según el país y normativa.", price:25, totalTickets:8000, soldTickets:3240, endsAt:daysFromNow(22), featured:false, ribbon:"VIP" },
+        { id:uuid(), title:"Moto urbana • 150cc", category:"motos", desc:"Sorteo demo con estilo rojo/amarillo y progreso en vivo.", price:8, totalTickets:4200, soldTickets:2100, endsAt:daysFromNow(8), featured:true, ribbon:"NUEVO" },
+        { id:uuid(), title:"Setup Gamer • Full", category:"tecnologia", desc:"Sorteo demo ideal para campañas rápidas y virales.", price:5, totalTickets:3000, soldTickets:980, endsAt:daysFromNow(15), featured:false, ribbon:"OFERTA" },
+        { id:uuid(), title:"Camioneta • 4x4", category:"autos", desc:"Sorteo demo. UI pro y lista para conectar backend.", price:15, totalTickets:6500, soldTickets:4120, endsAt:daysFromNow(5), featured:false, ribbon:"HOT" },
+      ];
+    }
+
+    function sortFn(sort,a,b){
+      if(sort==="featured") return (b.featured-a.featured) || (a.endsAt-b.endsAt);
+      if(sort==="ending") return a.endsAt-b.endsAt;
+      if(sort==="priceAsc") return a.price-b.price;
+      if(sort==="priceDesc") return b.price-a.price;
+      return 0;
+    }
+
+    function renderGrid(){
+      const grid=$("#cardsGrid");
+      const q=($("#searchInput").value||"").trim().toLowerCase();
+      const cat=$("#categorySelect").value;
+      const sort=$("#sortSelect").value;
+
+      let items=[...state.draws];
+      if(cat!=="all") items=items.filter(d=>d.category===cat);
+      if(q) items=items.filter(d=> d.title.toLowerCase().includes(q) || d.desc.toLowerCase().includes(q));
+
+      items.sort((a,b)=>sortFn(sort,a,b));
+      grid.innerHTML="";
+
+      if(!items.length){
+        grid.innerHTML = `<div class="muted" style="padding:16px; border-radius:18px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); font-weight:900">
+          No hay sorteos que coincidan con tu búsqueda.
+        </div>`;
+        return;
+      }
+
+      for(const draw of items){
+        const percent=pctSold(draw);
+        const available=availableTickets(draw);
+
+        const el=document.createElement("article");
+        el.className="card";
+
+        el.innerHTML = `
+          <div class="media">
+            <div class="ribbon">${escapeHtml(draw.ribbon || "HOT")}</div>
+          </div>
+          <div class="body">
+            <div class="row">
+              <span class="chip"><i style="background:${catDotColor(draw.category)}"></i>${labelCategory(draw.category)}</span>
+              <span class="small">Cierra: ${fmtDate(draw.endsAt)}</span>
+            </div>
+
+            <div class="title">${escapeHtml(draw.title)}</div>
+
+            <div class="row">
+              <div>
+                <div class="small">Ticket</div>
+                <div class="price"><b>${state.currency}</b> ${fmtInt(draw.price)}</div>
+              </div>
+              <div style="text-align:right">
+                <div class="small">Disponibles</div>
+                <div class="price">${fmtInt(available)}</div>
+              </div>
+            </div>
+
+            <div class="progressWrap">
+              <div class="progressTop">
+                <span class="small">Progreso</span>
+                <span class="small">${percent}%</span>
+              </div>
+              <div class="progress">
+                <div class="bar" style="width:${percent}%"></div>
+              </div>
+            </div>
+
+            <div class="ctaRow">
+              <button class="btn btn--soft btnSmall" type="button" data-open="${draw.id}">Ver detalle</button>
+              <button class="btn btn--hot btnSmall" type="button" data-quickbuy="${draw.id}">Comprar</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(el);
+      }
+
+      $$("[data-open]").forEach(b => b.addEventListener("click", () => openDrawModal(b.dataset.open)));
+      $$("[data-quickbuy]").forEach(b => b.addEventListener("click", () => {
+        openDrawModal(b.dataset.quickbuy);
+        setTimeout(()=> $("#buyBtn").click(), 80);
+      }));
+    }
+
+    function openDrawModal(id){
+      const draw=state.draws.find(d=>d.id===id);
+      if(!draw) return;
+      state.activeDrawId=id;
+      state.qty=1;
+
+      $("#modalCategory").innerHTML = `<span class="flame">🎁</span> ${labelCategory(draw.category)}`;
+      $("#modalTitle").textContent = draw.title;
+      $("#modalDesc").textContent = draw.desc;
+      $("#modalTicket").innerHTML = `<b>${state.currency}</b> ${fmtInt(draw.price)}`;
+      $("#modalAvailable").textContent = fmtInt(availableTickets(draw));
+      $("#modalEnds").textContent = fmtDate(draw.endsAt);
+
+      const percent=pctSold(draw);
+      $("#modalProgressText").textContent = `${percent}% vendido`;
+      $("#modalProgressBar").style.width = `${percent}%`;
+
+      $("#qtyInput").value="1";
+
+      showModal($("#drawModal"));
+    }
+
+    function closeDrawModal(){ hideModal($("#drawModal")); state.activeDrawId=null; }
+    function openAdmin(){ showModal($("#adminModal")); refreshAdmin(); }
+    function closeAdmin(){ hideModal($("#adminModal")); }
+
+    function setQty(n){
+      state.qty = clamp(Number.isFinite(n) ? n : 1, 1, 999);
+      $("#qtyInput").value = String(state.qty);
+    }
+
+    function buyTicketsDemo(){
+      const draw = state.draws.find(d=>d.id===state.activeDrawId);
+      if(!draw) return;
+      const qty = clamp(state.qty, 1, 999);
+      const available = availableTickets(draw);
+
+      if(available<=0) return toast("⚠️ No hay tickets disponibles.");
+      if(qty>available) return toast(`⚠️ Solo quedan ${available} tickets disponibles.`);
+
+      draw.soldTickets += qty;
+      toast(`✅ Compra demo: ${qty} ticket(s) • Total ${fmtMoney(qty*draw.price)}`);
+      renderGrid();
+      openDrawModal(draw.id);
+      refreshAdmin(); // si está abierto
+    }
+
+    function resetAdminForm(){
+      $("#aId").value="";
+      $("#aTitle").value="";
+      $("#aCategory").value="autos";
+      $("#aPrice").value=10;
+      $("#aTotal").value=5000;
+      $("#aDesc").value="";
+      $("#aRibbon").value="HOT";
+      $("#aEnds").value = toDateInputValue(daysFromNow(10));
+    }
+    function toDateInputValue(date){
+      const d=new Date(date);
+      const yyyy=d.getFullYear();
+      const mm=String(d.getMonth()+1).padStart(2,"0");
+      const dd=String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function refreshAdmin(){
+      const list=$("#adminList");
+      if(!list) return;
+
+      list.innerHTML = "";
+      for(const d of state.draws){
+        const item=document.createElement("div");
+        item.className="adminItem";
+        item.innerHTML=`
+          <div>
+            <div class="t">${escapeHtml(d.title)}</div>
+            <div class="s">${labelCategory(d.category)} • Ticket ${fmtMoney(d.price)} • Cierra ${fmtDate(d.endsAt)} • ${escapeHtml(d.ribbon||"")}</div>
+          </div>
+          <div class="rowBtns">
+            <button class="smallBtn" data-edit="${d.id}" type="button">Editar</button>
+            <button class="smallBtn danger" data-del="${d.id}" type="button">Eliminar</button>
+          </div>
+        `;
+        list.appendChild(item);
+      }
+
+      $$("[data-edit]").forEach(b => b.addEventListener("click", ()=>loadToForm(b.dataset.edit)));
+      $$("[data-del]").forEach(b => b.addEventListener("click", ()=>deleteDraw(b.dataset.del)));
+
+      const sel=$("#winnerDrawSelect");
+      if(sel) sel.innerHTML = state.draws.map(d => `<option value="${d.id}">${escapeHtml(d.title)}</option>`).join("");
+
+      renderWinners();
+    }
+
+    function loadToForm(id){
+      const d=state.draws.find(x=>x.id===id);
+      if(!d) return;
+
+      $("#aId").value=d.id;
+      $("#aTitle").value=d.title;
+      $("#aCategory").value=d.category;
+      $("#aPrice").value=d.price;
+      $("#aTotal").value=d.totalTickets;
+      $("#aDesc").value=d.desc;
+      $("#aRibbon").value=d.ribbon || "HOT";
+      $("#aEnds").value = toDateInputValue(d.endsAt);
+      toast("✏️ Editando sorteo (demo).");
+    }
+
+    function deleteDraw(id){
+      const d=state.draws.find(x=>x.id===id);
+      if(!d) return;
+      if(!confirm(`¿Eliminar "${d.title}"?`)) return;
+      state.draws = state.draws.filter(x=>x.id!==id);
+      toast("🗑️ Sorteo eliminado.");
+      refreshAdmin();
+      renderGrid();
+    }
+
+    function onAdminSubmit(e){
+      e.preventDefault();
+      const isEdit = Boolean($("#aId").value);
+      const id = $("#aId").value || uuid();
+
+      const title = $("#aTitle").value.trim();
+      const category = $("#aCategory").value;
+      const price = parseInt($("#aPrice").value||"10", 10);
+      const totalTickets = parseInt($("#aTotal").value||"5000", 10);
+      const desc = $("#aDesc").value.trim() || "Descripción pendiente.";
+      const ribbon = $("#aRibbon").value || "HOT";
+      const endsAt = $("#aEnds").value ? new Date($("#aEnds").value + "T23:59:59") : daysFromNow(10);
+
+      if(!title) return toast("⚠️ Título requerido.");
+
+      if(isEdit){
+        const idx=state.draws.findIndex(d=>d.id===id);
+        if(idx>=0){
+          const sold = clamp(state.draws[idx].soldTickets, 0, totalTickets);
+          state.draws[idx] = { ...state.draws[idx], title, category, price, totalTickets, desc, ribbon, endsAt, soldTickets:sold };
+          toast("✅ Sorteo actualizado.");
+        }
+      } else {
+        state.draws.unshift({ id, title, category, desc, price, totalTickets, soldTickets:0, endsAt, featured:false, ribbon });
+        toast("✅ Sorteo creado.");
+      }
+
+      resetAdminForm();
+      refreshAdmin();
+      renderGrid();
+    }
+
+    function publishWinnerDemo(){
+      const drawId = $("#winnerDrawSelect").value;
+      const draw = state.draws.find(d=>d.id===drawId);
+      if(!draw) return;
+
+      state.winners.unshift({
+        id: uuid(),
+        drawId,
+        drawTitle: draw.title,
+        name: fakeName(),
+        ticket: String(Math.floor(Math.random()*draw.totalTickets)+1).padStart(4,"0"),
+        at: new Date(),
+      });
+
+      toast("🏆 Ganador publicado (demo).");
+      renderWinners();
+    }
+
+    function renderWinners(){
+      const box=$("#winnersLog");
+      if(!box) return;
+      box.innerHTML="";
+
+      if(!state.winners.length){
+        box.innerHTML = `<div class="muted" style="font-weight:900">Aún no hay ganadores publicados.</div>`;
+        return;
+      }
+
+      state.winners.slice(0, 12).forEach(w=>{
+        const el=document.createElement("div");
+        el.className="winner";
+        el.innerHTML=`
+          <div class="top">
+            <div class="name">${escapeHtml(w.name)}</div>
+            <div class="chip"><i></i> Ticket #${w.ticket}</div>
+          </div>
+          <div class="meta">${escapeHtml(w.drawTitle)} • ${fmtDateTime(w.at)}</div>
+        `;
+        box.appendChild(el);
+      });
+    }
+
+    function init(){
+      state.draws = seedDraws();
+      $("#year").textContent = new Date().getFullYear();
+
+      const featured = state.draws.find(d=>d.featured) || state.draws[0];
+      $("#featuredTitle").textContent = featured.title;
+      $("#featuredTicketPrice").innerHTML = `<b>${state.currency}</b> ${fmtInt(featured.price)}`;
+      $("#featuredAvailable").textContent = fmtInt(availableTickets(featured));
+      startCountdown($("#heroCountdown"), featured.endsAt);
+
+      $("#howBtn").addEventListener("click", ()=> document.getElementById("como").scrollIntoView({behavior:"smooth"}));
+      $("#quickToastBtn").addEventListener("click", ()=> toast("🔥 UI llamativa activada: rojos + amarillos + glow"));
+      $("#featuredBuyBtn").addEventListener("click", ()=> toast("✅ Compra simulada (demo)."));
+
+      $("#searchInput").addEventListener("input", renderGrid);
+      $("#categorySelect").addEventListener("change", renderGrid);
+      $("#sortSelect").addEventListener("change", renderGrid);
+
+      $("#closeDrawBtn").addEventListener("click", closeDrawModal);
+      $("#drawModal").addEventListener("click", (e)=>{ if(e.target?.dataset?.close) closeDrawModal(); });
+
+      $("#qtyMinus").addEventListener("click", ()=> setQty(state.qty-1));
+      $("#qtyPlus").addEventListener("click", ()=> setQty(state.qty+1));
+      $("#qtyInput").addEventListener("input", (e)=> setQty(parseInt(e.target.value||"1",10)));
+      $("#buyBtn").addEventListener("click", buyTicketsDemo);
+
+      $("#openAdminBtn").addEventListener("click", openAdmin);
+      $("#closeAdminBtn").addEventListener("click", closeAdmin);
+      $("#adminModal").addEventListener("click", (e)=>{ if(e.target?.dataset?.close) closeAdmin(); });
+
+      $("#resetFormBtn").addEventListener("click", resetAdminForm);
+      $("#adminForm").addEventListener("submit", onAdminSubmit);
+      $("#publishWinnerBtn").addEventListener("click", publishWinnerDemo);
+
+      document.addEventListener("keydown", (e)=>{
+        if(e.key==="Escape"){ closeDrawModal(); closeAdmin(); }
+      });
+
+      resetAdminForm();
+      renderGrid();
+      refreshAdmin();
+    }
+
+    init();
+  </script>
+</body>
+</html>
